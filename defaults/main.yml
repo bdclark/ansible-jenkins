@@ -1,0 +1,44 @@
+---
+# leave null or empty string to install via repo.
+# lf version is specified, deb/rpm of specified version will be downloaded/installed.
+jenkins_version: ~
+# when installing via repo, use `latest` to upgrade from a previous install.
+jenkins_package_state: present
+
+# apt repo and key url
+jenkins_apt_repo: deb https://pkg.jenkins.io/debian binary/
+jenkins_apt_key_url: https://pkg.jenkins.io/debian/jenkins.io.key
+# deb package url when installing specific version
+jenkins_deb_pkg_url: "https://pkg.jenkins.io/debian/binary/jenkins_{{ jenkins_version | string }}_all.deb"
+
+# yum repo and key urls
+jenkins_yum_repo_url: http://pkg.jenkins.io/redhat
+jenkins_rpm_key_url: https://pkg.jenkins.io/redhat/jenkins.io.key
+# rpm package url when installing specific version
+jenkins_rpm_pkg_url: "https://pkg.jenkins.io/redhat/jenkins-{{ jenkins_version | string }}-1.1.noarch.rpm"
+
+# string of additional args passed to java
+jenkins_java_args: '-Djenkins.install.runSetupWizard=false'  # '-Xmx256m'
+# string of additional args passed to jenkins at startup
+jenkins_init_args: ''
+
+# jenkins home directory and mode
+jenkins_home: /var/lib/jenkins
+jenkins_home_mode: 0755
+# jenkins log directory and mode
+jenkins_log_dir: /var/log/jenkins  # currently can only be changed in Debian-based systems!
+jenkins_log_dir_mode: 0750
+
+# http port for jenkins to listen on
+jenkins_http_port: 8080
+# ip address for jenkins to listen on
+jenkins_http_listen_address: 0.0.0.0
+# url prefix for all jenkins requests
+jenkins_url_prefix: ''
+
+# whether jenkins service is started/enabled or stopped/disabled
+jenkins_service_enabled: true
+
+# set this to a custom template to use instead of role's internal templates
+# for /etc/default/jenkins or /etc/sysconfig/jenkins
+jenkins_init_config_template: ~

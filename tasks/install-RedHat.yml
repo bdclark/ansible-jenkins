@@ -1,0 +1,58 @@
+---
+- name: determine if specific jenkins version already downloaded
+  stat:
+    path: "/tmp/{{ jenkins_rpm_pkg_url | basename }}"
+  register: _jenkins_specific_version
+  when: jenkins_version != none and jenkins_version | string | length > 0
+
+- name: download specific jenkins version
+  get_url:
+    url: "{{ jenkins_rpm_pkg_url }}"
+    dest: "/tmp/{{  jenkins_rpm_pkg_url | basename }}"
+  when: (jenkins_version != none and jenkins_version | string | length > 0) and not _jenkins_specific_version.stat.exists
+
+- name: install specific jenkins version
+  yum:
+    name: "/tmp/{{  jenkins_rpm_pkg_url | basename }}"
+    state: present
+  register: _jenkins_install_pkg
+  when: jenkins_version != none and jenkins_version | string | length > 0
+
+- name: ensure dependencies are installed
+  package:
+    name:
+      - curl
+      - libselinux-python
+      - initscripts
+    state: present
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: add Jenkins rpm key
+  rpm_key:
+    state: present
+    key: "{{ jenkins_rpm_key_url }}"
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: add jenkins yum repository
+  yum_repository:
+    name: jenkins
+    description: Jenkins repository
+    baseurl: "{{ jenkins_yum_repo_url }}"
+    gpgcheck: true
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: install jenkins from repo
+  yum:
+    name: jenkins
+    state: "{{ jenkins_package_state }}"
+  register: _jenkins_install_repo
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: manage init config file
+  template:
+    src: "{{ jenkins_init_config_template if jenkins_init_config_template != none and jenkins_init_config_template|string != '' else 'config-RedHat.j2' }}"
+    dest: /etc/sysconfig/jenkins
+    owner: root
+    group: root
+    mode: 0640
+  notify: restart jenkins

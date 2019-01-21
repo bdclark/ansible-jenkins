@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  author: Brian Clark <brian@clark.zone>
+  description: Install and configure Jenkins
+
+  license: MIT
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: EL
+      versions:
+        - 6
+        - 7
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+
+  galaxy_tags: []
+
+dependencies: []

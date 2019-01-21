@@ -1,0 +1,41 @@
+---
+- name: ensure supported OS
+  assert:
+    that: ansible_os_family in ['RedHat', 'Debian']
+
+- name: ensure supported jenkins_log_dir setting
+  fail:
+    msg: jenkins_log_dir must be '/var/log/jenkins' on this OS family
+  when: ansible_os_family == 'RedHat' and jenkins_log_dir != '/var/log/jenkins'
+
+- include_tasks: "install-{{ ansible_os_family }}.yml"
+
+- name: manage log directory
+  file:
+    path: /var/log/jenkins
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: "{{ jenkins_log_dir_mode }}"
+
+- name: manage jenkins home directory
+  file:
+    path: "{{ jenkins_home }}"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: "{{ jenkins_home_mode }}"
+
+- name: manage custom groovy scripts directory
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: "{{ jenkins_home_mode }}"
+
+- name: manage jenkins service state
+  service:
+    name: jenkins
+    state: "{{ 'started' if jenkins_service_enabled else 'stopped' }}"
+    enabled: "{{ jenkins_service_enabled }}"

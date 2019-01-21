@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: install jre (debian)
+      apt:
+        name: openjdk-8-jre
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: install jre (redhat)
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: include jenkins role
+      include_role:
+        name: jenkins
+
+    - name: flush handlers to process ansible restart
+      meta: flush_handlers
+
+    - name: wait for jenkins to start
+      uri:
+        url: http://localhost:8080/login
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 30
+      delay: 2

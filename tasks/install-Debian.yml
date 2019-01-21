@@ -1,0 +1,58 @@
+---
+# update /etc/default/jenkins before package install
+# so settings are applied before initial service startup
+- name: manage init config file
+  template:
+    src: "{{ jenkins_init_config_template if jenkins_init_config_template != none and jenkins_init_config_template|string != '' else 'config-Debian.j2' }}"
+    dest: /etc/default/jenkins
+    owner: root
+    group: root
+    mode: 0640
+  notify: restart jenkins
+
+- name: determine if specific jenkins version already downloaded
+  stat:
+    path: "/tmp/{{ jenkins_deb_pkg_url | basename }}"
+  register: _jenkins_specific_version
+  when: jenkins_version != none and jenkins_version | string | length > 0
+
+- name: download specific jenkins version
+  get_url:
+    url: "{{ jenkins_deb_pkg_url }}"
+    dest: "/tmp/{{  jenkins_deb_pkg_url | basename }}"
+  when: (jenkins_version != none and jenkins_version | string | length > 0) and not _jenkins_specific_version.stat.exists
+
+- name: install specific jenkins version
+  apt:
+    deb: "/tmp/{{  jenkins_deb_pkg_url | basename }}"
+    state: present
+  register: _jenkins_install_pkg
+  when: jenkins_version != none and jenkins_version | string | length > 0
+
+- name: ensure dependencies are installed
+  apt:
+    name:
+      - curl
+      - apt-transport-https
+    state: present
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: add Jenkins apt key
+  apt_key:
+    url: "{{ jenkins_apt_key_url }}"
+    state: present
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: add jenkins apt repository
+  apt_repository:
+    repo: "{{ jenkins_apt_repo }}"
+    state: present
+    update_cache: true
+  when: jenkins_version == none or jenkins_version | string | length == 0
+
+- name: install jenkins from repo
+  apt:
+    name: jenkins
+    state: "{{ jenkins_package_state }}"
+  register: _jenkins_install_repo
+  when: jenkins_version == none or jenkins_version | string | length == 0
