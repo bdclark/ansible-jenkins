@@ -1,18 +1,19 @@
 ---
-# leave null or empty string to install via repo.
-# lf version is specified, deb/rpm of specified version will be downloaded/installed.
+# leave null or empty string to install via repo
+# lf version is specified, deb/rpm of specified version will be downloaded/installed
 jenkins_version: ~
 # when installing via repo, use `latest` to upgrade from a previous install.
 jenkins_package_state: present
-
+# whether to use stable repo
+jenkins_use_stable_repo: true
 # apt repo and key url
-jenkins_apt_repo: deb https://pkg.jenkins.io/debian binary/
+jenkins_apt_repo: "deb https://pkg.jenkins.io/debian{% if jenkins_use_stable_repo %}-stable{% endif %} binary/"
 jenkins_apt_key_url: https://pkg.jenkins.io/debian/jenkins.io.key
 # deb package url when installing specific version
 jenkins_deb_pkg_url: "https://pkg.jenkins.io/debian/binary/jenkins_{{ jenkins_version | string }}_all.deb"
 
 # yum repo and key urls
-jenkins_yum_repo_url: http://pkg.jenkins.io/redhat
+jenkins_yum_repo_url: http://pkg.jenkins.io/redhat{% if jenkins_use_stable_repo %}-stable{% endif %}
 jenkins_rpm_key_url: https://pkg.jenkins.io/redhat/jenkins.io.key
 # rpm package url when installing specific version
 jenkins_rpm_pkg_url: "https://pkg.jenkins.io/redhat/jenkins-{{ jenkins_version | string }}-1.1.noarch.rpm"

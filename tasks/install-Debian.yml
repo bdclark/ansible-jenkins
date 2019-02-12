@@ -45,6 +45,7 @@
 
 - name: add jenkins apt repository
   apt_repository:
+    filename: jenkins
     repo: "{{ jenkins_apt_repo }}"
     state: present
     update_cache: true
