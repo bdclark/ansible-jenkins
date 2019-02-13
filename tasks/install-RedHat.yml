@@ -50,7 +50,7 @@
 
 - name: manage init config file
   template:
-    src: "{{ jenkins_init_config_template if jenkins_init_config_template != none and jenkins_init_config_template|string != '' else 'config-RedHat.j2' }}"
+    src: "{{ jenkins_init_config_template if jenkins_init_config_template != none and jenkins_init_config_template|string|length else 'config-RedHat.j2' }}"
     dest: /etc/sysconfig/jenkins
     owner: root
     group: root
